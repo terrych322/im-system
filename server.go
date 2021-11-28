@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"sync"
 )
@@ -54,6 +55,24 @@ func (s *Server) hanler(conn net.Conn) {
 
 	// 广播当前用户上线
 	s.BoradCast(user, "已上线")
+
+	// 接收客户端上线的消息
+	go func() {
+		buf := make([]byte, 4096)
+		for {
+			n, err := conn.Read(buf)
+			if n == 0 {
+				s.BoradCast(user, "下线")
+				return
+			}
+			if err != nil && err != io.EOF {
+				fmt.Println("Conn Read err: ", err)
+				return
+			}
+			msg := string(buf[:n-1])
+			s.BoradCast(user, msg)
+		}
+	}()
 	// 当前handler阻塞
 	select {}
 }
