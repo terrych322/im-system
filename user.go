@@ -41,8 +41,25 @@ func (u *User) Offline() {
 	s.BoradCast(u, "已下线")
 }
 
+// 给当前用户的客户端发送广播
+func (u *User) sendMessage(msg string) {
+	u.conn.Write([]byte(msg))
+}
+
 func (u *User) DoMessage(msg string) {
-	u.server.BoradCast(u, msg)
+	s := u.server
+	if msg == "who" {
+		//查询当前用户都有哪些
+		s.mapLock.Lock()
+		for _, user := range s.OnlineMap {
+			onlineMsg := "[" + user.Addr + "]" + user.Name + "在线...\n"
+			u.sendMessage(onlineMsg)
+		}
+		s.mapLock.Unlock()
+	} else {
+		s.BoradCast(u, msg)
+	}
+
 }
 
 // 监听当前user channel的方法, 一旦有消息, 就直接发送给客户端
