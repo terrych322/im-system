@@ -1,6 +1,10 @@
 package main
 
-import "net"
+import (
+	"fmt"
+	"net"
+	"strings"
+)
 
 type User struct {
 	Name string
@@ -56,6 +60,19 @@ func (u *User) DoMessage(msg string) {
 			u.sendMessage(onlineMsg)
 		}
 		s.mapLock.Unlock()
+	} else if len(msg) > 7 && msg[:7] == "rename|" {
+		newName := strings.Split(msg, "|")[1]
+		_, ok := s.OnlineMap[newName]
+		if ok {
+			fmt.Println("当前用户名被使用")
+		} else {
+			s.mapLock.Lock()
+			delete(s.OnlineMap, u.Name)
+			s.OnlineMap[newName] = u
+			s.mapLock.Unlock()
+			u.Name = newName
+			u.sendMessage("更改用户名成功, 新用户名是:" + newName)
+		}
 	} else {
 		s.BoradCast(u, msg)
 	}
