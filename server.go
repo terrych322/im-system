@@ -48,13 +48,8 @@ func (s *Server) hanler(conn net.Conn) {
 	// 当前链接的任务
 	// fmt.Println("链接建立成功!")
 	// 用户上线, 将用户加入到onLineMap中
-	user := NewUser(conn)
-	s.mapLock.Lock()
-	s.OnlineMap[user.Name] = user
-	s.mapLock.Unlock()
-
-	// 广播当前用户上线
-	s.BoradCast(user, "已上线")
+	user := NewUser(conn, s)
+	user.Online()
 
 	// 接收客户端上线的消息
 	go func() {
@@ -62,15 +57,14 @@ func (s *Server) hanler(conn net.Conn) {
 		for {
 			n, err := conn.Read(buf)
 			if n == 0 {
-				s.BoradCast(user, "下线")
+				user.Offline()
 				return
 			}
 			if err != nil && err != io.EOF {
 				fmt.Println("Conn Read err: ", err)
 				return
 			}
-			msg := string(buf[:n-1])
-			s.BoradCast(user, msg)
+			user.DoMessage(string(buf[:n-1]))
 		}
 	}()
 	// 当前handler阻塞
