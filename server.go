@@ -76,7 +76,7 @@ func (s *Server) hanler(conn net.Conn) {
 		select {
 		case <-isLive:
 			// 不做任何事情,为了激活select, 更新下面的定时器
-		case <-time.After(time.Second * 10):
+		case <-time.After(time.Second * 300):
 			//已经超时
 			//将当前用户强制关闭
 			user.sendMessage("你被踢了!")
