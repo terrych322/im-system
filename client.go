@@ -67,13 +67,38 @@ func (c *Client) UpdateName() bool {
 	return true
 }
 
+func (c *Client) PublicChat() {
+	// 提示用户输入聊天内容
+	var charMsg string
+	fmt.Println("请输入聊天内容, exit退出")
+	fmt.Scanln(&charMsg)
+	for {
+		if charMsg != "exit" {
+			// 发送给服务器
+			if len(charMsg) != 0 {
+				sendMsg := charMsg + "\n"
+				_, err := c.conn.Write([]byte(sendMsg))
+				if err != nil {
+					fmt.Println("conn,Write err: ", err)
+					break
+				}
+			}
+
+			charMsg = ""
+			fmt.Println("请输入聊天内容, exit退出")
+			fmt.Scanln(&charMsg)
+
+		}
+	}
+}
+
 func (c *Client) Run() {
 	for c.flag != 0 {
 		for c.menu() == true {
 			// 根据不同模式处理不同业务
 			switch c.flag {
 			case 1:
-				fmt.Println("公聊模式选择")
+				c.PublicChat()
 				break
 			case 2:
 				fmt.Println("私聊模式选择")
