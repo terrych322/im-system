@@ -71,7 +71,7 @@ func (u *User) DoMessage(msg string) {
 			s.OnlineMap[newName] = u
 			s.mapLock.Unlock()
 			u.Name = newName
-			u.sendMessage("更改用户名成功, 新用户名是:" + newName)
+			u.sendMessage("更改用户名成功, 新用户名是:" + newName + "\n")
 		}
 	} else if len(msg) > 4 && msg[:3] == "to|" {
 		// 获取对方的用户名
